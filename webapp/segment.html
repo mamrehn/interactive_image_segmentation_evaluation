@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Interactive Segmentation UI</title>
+
+    <!-- https://raw.githubusercontent.com/jackspirou/clientjs/master/dist/client.min.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ClientJS/0.1.11/client.min.js" integrity="sha256-yspuUaQ+vDgNFEqN6UP2sCzPaxkkwG+J3mHzyx9LCBk=" crossorigin="anonymous"></script>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.4.1/css/bootstrap.min.css" integrity="sha256-bZLfwXAP04zRMK2BjiO8iu9pf4FbLqX6zitd+tIvLhE=" crossorigin="anonymous" />
+    <!-- <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha256-YLGeXaapI0/5IgZopewRJcFXomhRMlYYjugPLSyNjTY=" crossorigin="anonymous" /> -->
+
+    <link href="css/custom.css" rel="stylesheet" />
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/angular.js/1.7.8/angular.min.js" integrity="sha256-23hi0Ag650tclABdGCdMNSjxvikytyQ44vYGo9HyOrU=" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/angular.js/1.7.8/angular-animate.min.js" integrity="sha256-biQnzwpmTVb5ZZDRDiU8iwbj7ZPTH9SZSxn5gewyFA0=" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/angular.js/1.7.8/angular-aria.min.js" integrity="sha256-oNV+8AzrXKmECd3VsoTxpdw8xuWAs1lAL85LG5U7gBM=" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/angular.js/1.7.8/angular-messages.min.js" integrity="sha256-NH+B//yMPOs9SsRoja1OuMOrbVA97MiD4ieDkKXr3KQ=" crossorigin="anonymous"></script>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/angular-material/1.1.18/angular-material.min.css" integrity="sha256-GOiHM1s7jkFNwWdvyi3e3YLRrEoWQp31KF7Dj90f2dQ=" crossorigin="anonymous" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/angular-material/1.1.18/angular-material.min.js" integrity="sha256-AgqTcThshYRMDRG2Ixs2kZED4Nh1jTxo47LWcVU008g=" crossorigin="anonymous"></script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script>
+
+    <script src="https://www.gstatic.com/firebasejs/6.0.2/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/6.0.2/firebase-database.js"></script>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-material-design/4.0.2/bootstrap-material-design.min.css" integrity="sha256-X/mlyZAafJ8j5e74pWh4+qNUD1zurCvLA6hODVobQX0=" crossorigin="anonymous" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-material-design/4.0.2/bootstrap-material-design.umd.min.js" integrity="sha256-GYcdwXot2kSaBb8kr9o8zDKYBwQ1PCkugjcCYFQS+IA=" crossorigin="anonymous"></script>
+
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: Helvetica;
+            font-size: 100%;
+            background-color: #0f0f0f;
+        }
+        .crisp_canvas {
+            /* http://stackoverflow.com/questions/7615009/disable-interpolation-when-scaling-a-canvas */
+            image-rendering: optimizeSpeed;             /* Older versions of FF          */
+            image-rendering: -moz-crisp-edges;          /* FF 6.0+                       */
+            image-rendering: -webkit-optimize-contrast; /* Safari                        */
+            image-rendering: -o-crisp-edges;            /* OS X & Windows Opera (12.02+) */
+            image-rendering: pixelated;                 /* Awesome future-browsers       */
+            -ms-interpolation-mode: nearest-neighbor;   /* IE                            */
+        }
+        .btn.sharp {
+            border-radius: 1%;
+        }
+        .vcenter {
+            display: inline-block;
+            vertical-align: middle;
+            float: none;
+        }
+        .emph {
+            text-decoration: underline;
+            text-decoration-style: dotted;
+            text-decoration-color: #474747;
+            cursor: help;
+        }
+    </style>
+</head>
+<body ng-app="EFKT">
+
+<div id="wrapper">
+    <div id="page-content-wrapper" class="container-fluid" style="padding-top: 1em; padding-left: 0;">
+        <div class="col-md-4 col-md-offset-1" style="padding: 0;">
+
+            <div class="col-md-9" style="margin: 0; padding: 0;" ng-controller="SliderCtrl">
+                <div style="margin: 0 0 1.125em 0; padding: 0; background-color: #1c1c1c;" class="col-md-12">
+                    <md-content class="col-md-12" style="margin: 0.2em 0 0 0; background-color: #1c1c1c;"">
+                        <p class="md-body-1" style="color: #eee; margin: 0; font-size: 100%;">Contour Line Opacity</p>
+                        <md-slider id="contour_line_slider" flex min="0" max="7" ng-model="contour_slider.value"
+                                   aria-label="contour slider" class="md-primary"> <!--  onchange="set_window_center(event)" -->
+                        </md-slider>
+                    </md-content>
+                </div>
+
+                <div style="margin: 0; padding: 0; background-color: #1c1c1c;" class="col-md-12">
+                    <md-content class="col-md-12" style="margin: 0.5em 0 1em 0; background-color: #1c1c1c;">
+                        <p class="md-body-1" style="color: #eee; margin: 0.25em 0 0 0; font-size: 100%;">Window Width
+                            <span id="auto_window" class="btn btn-sm" style="margin: 0 0 0 15.5em; padding: 0.15em ; color: #aaa;">Automatic Windowing</span>
+                        </p>
+                        <md-slider-container>
+                            <md-slider id="window_width_slider" flex min="0" max="255" ng-model="windowing_slider.width_val"
+                                       aria-label="window width" class="md-primary">
+                            </md-slider>
+                        </md-slider-container>
+                    </md-content>
+
+                    <md-content class="col-md-12" style="margin: 0; background-color: #1c1c1c;">
+                        <p class="md-body-1" style="color: #eee; margin: 0; font-size: 100%;">Window Center</p>
+                        <md-slider id="window_center_slider" flex min="0" max="255" ng-model="windowing_slider.center_val"
+                                   aria-label="window center" class="md-primary"> <!--  onchange="set_window_center(event)" -->
+                        </md-slider>
+                    </md-content>
+                </div>
+            </div>
+
+            <div class="col-md-3">
+                <button id="add_foreground" title="Switch to FG seed drawing mode." style="margin: 0; padding: 0.75em 0 0.75em 0; font-size: 110%;" class="btn btn-md sharp btn-fg col-md-12" type="button">
+                    <span class="glyphicon glyphicon-plus"></span><br/>Object
+                </button>
+
+                <button id="add_background" title="Switch to BG seed drawing mode.&#013;Tip: you can use the right mouse button instead." style="margin-top: 1em; padding: 0.75em 0 0.75em 0; font-size: 110%;" class="btn btn-md sharp btn-bg col-md-12" type="button">
+                    <span class="glyphicon glyphicon-minus"></span><br/>Background
+                </button>
+
+                <button id="back_btn" title="Undo the drawing of latest seeds." style="margin-top: 1em; padding: 0.75em 0 0.75em 0; font-size: 110%;" class="btn btn-md sharp btn-default col-md-12" type="button">
+                    <span class="glyphicon glyphicon-arrow-left"></span><br/>Undo
+                </button>
+            </div>
+
+            <div class="col-md-offset-9 col-md-3">
+                <button id="gt_btn" title="Show the remaining difference to the ground truth image.&#013;Keep pressed to see the differences!&#013;Usable every 4 seconds."
+                        style="margin-top: 1em; padding: 1.75em 0 1.75em 0; font-size: 110%;" class="btn btn-md sharp btn-default col-md-12" type="button">
+                    <span class="glyphicon glyphicon-eye-open"></span><br/>Show Hint
+                </button>
+            </div>
+
+            <div class="col-md-12" style="color: #aaa; margin: 0; padding: 0; font-size: 95%;">
+                Example Workflow:
+                <ol style="margin: 0; padding: 0 0 0 1.25em;">
+                    <li style="margin-bottom: 0.25em;">Click on
+                        <span class="emph" title="The button labeled 'Show Hint' above is useful to observe &#013;shortcomings in the current segmentation result by depicting &#013;differences to the ground truth segmentation."
+                              style="color: #ccc; font-weight: bold;">Show Hint
+                            <span class="glyphicon glyphicon-eye-open"></span>
+                        </span>
+                        to observe an outline of the object to segment.</li>
+                    <li style="margin-bottom: 0.25em;">While observing the object, use the windowing sliders
+                        <span class="emph" title="The sliders labeled 'Window Width' and 'Window Center'"
+                              style="color: #ccc; font-weight: bold;">&#9644;&#9679;&#9644;</span>
+                        to adjust the pixel values in the image to improve object to background contrast, or choose
+                        <span class="emph" title="The button labeled 'Automatic Windowing' above will &#013;increase the visibility of the object to segment."
+                              style="color: #ccc; font-weight: bold;">Automatic Windowing</span>.</li>
+                    <li>Draw seed points <span style="color: #ddd; font-weight: bold;">&#9642;</span>,
+                        lines <span style="color: #ddd; font-weight: bold;">⌇</span>,
+                        or complex shapes
+                        <span style="color: #ddd; font-weight: bold;">⛵</span> onto the image, representing either <!-- ⅋ -->
+                        <span class="emph" title="Object/foreground seeds" style="color: #c9cd00; font-weight: bold;">
+                            foreground/object ➕
+                        </span> or
+                        <span class="emph" title="Background seeds" style="color: #6700cd; font-weight: bold;">
+                            background ➖
+                        </span> regions, until you are
+                        <span class="emph" title="Click on 'Finish' to submit the current segmentation when the current (cyan) outline &#013;on the right is accurate enough to represent the object."
+                              style="color: #4ca542; font-weight: bold;">satisfied</span> with the
+                        <span class="emph" title="The current result is always &#013;depicted as a cyan contour line." style="font-weight: bold;">result</span>.<br/>
+                        <span class="glyphicon glyphicon-info-sign"></span>
+                        Try not to draw directly on the contour line of the object, but clearly inside or outside of it.
+                        ★ Play around with all the controls. If things get out of hand, you can always easily
+                        <span class="emph" title="Click on 'Restart' to delete the current result &#013;for a fresh start on this data set." style="color: #b85353; font-weight: bold;">restart</span>.
+                        <p class="row" style="margin: 1em 0 0 0.5em; padding: 0;">
+                            <img class="emph" title="Left and right mouse buttons are color coded to depict &#013;which labels are drawn on mouse event."
+                                 id="mouselabelhint" class="col-md-2 vcenter" style="margin: 0; padding: 0;"
+                                 src="mouse_fb.svg"/><!--
+                            --><span class="col-md-7 vcenter" style="margin: 0 0 0 2em; padding: 0;">
+                            <span style="font-weight: bold;">Tip</span>:
+                                use the left and right mouse buttons for easy foreground and background
+                                seed label drawing without changing labels via the
+                                <span style="color: #c9cd00;">➕</span>/<!--
+                                --><span style="color: #6700cd;">➖</span>
+                                buttons above.<!-- for every label/color change.-->
+                            </span>
+                        </p>
+                    </li>
+                </ol>
+            </div>
+
+            <div class="col-md-offset-5 col-md-7">
+                <button id="restart_btn" title="Start again on this data set without any prior scribbles.&#013;Use this instead of excessive 'Undo' if you made a mistake during seeding." style="margin-top: 1em; padding: 0.75em 0 0.75em 0; font-size: 110%;" class="btn btn-sm sharp btn-danger col-md-offset-1 col-md-5">
+                    <span class="glyphicon glyphicon-trash"></span><br/>Restart
+                </button>
+
+                <button id="confirm_btn" title="Finalize the segmentation of this data set&#013;if you are satisfied with the result."
+                        style="margin-top: 1em; padding: 0.75em 0 0.75em 0; font-size: 110%;" class="btn btn-sm sharp btn-primary col-md-offset-1 col-md-5" type="button" disabled>
+                    <span class="glyphicon glyphicon-check"></span><br/>Finish
+                </button>
+            </div>
+        </div>
+
+        <div class="col-md-7" oncontextmenu="return false;">
+            <canvas oncontextmenu="return false;" id="canvas" class="crisp_canvas"></canvas>
+        </div>
+    </div>
+</div>
+
+<script>
+    if (!window.location.href.includes('#') || !window.location.href.includes('@')){
+        if (window.location.href.split('#')[1]) {
+            window.location.href = 'index.html#' + window.location.href.split('#')[1];
+        } else {
+            window.location.href = 'index.html';
+        }
+    }
+    try {
+        $.material.init();
+    }
+    catch (e) {}
+</script>
+
+<script src="script/img_data.js"></script>
+<script src="script/angular_.js"></script>
+<script src="script/demo_seg.js"></script>
+
+</body>
+</html>

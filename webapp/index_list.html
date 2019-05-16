@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Interactive Segmentation</title>
+    <style>
+        #html {
+            background: #e0ffff;
+        }
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: Helvetica;
+        }
+        td {
+            padding-left: 2em;
+            font-size: 130%;
+        }
+        .heading {
+            font-size: 140%;
+        }
+        .itemsep_list {
+            margin-top: 0.5em;
+            font-size: 140%;
+        }
+        .center {
+            margin: 20%;
+        }
+        .two_columns {
+            -moz-column-count: 4;
+            -moz-column-gap: 0;
+            -webkit-column-count: 4;
+            -webkit-column-gap: 0;
+            column-count: 4;
+            column-gap: 0;
+        }
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.4.1/css/bootstrap.min.css" integrity="sha256-bZLfwXAP04zRMK2BjiO8iu9pf4FbLqX6zitd+tIvLhE=" crossorigin="anonymous" />
+    <!-- <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha256-YLGeXaapI0/5IgZopewRJcFXomhRMlYYjugPLSyNjTY=" crossorigin="anonymous" /> -->
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.4.1/js/bootstrap.min.js" integrity="sha256-nuL8/2cJ5NDSSwnKD8VqreErSWHtnEP9E7AySL+1ev4=" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/seedrandom/2.4.4/seedrandom.min.js" integrity="sha256-DVEUoO0nRxUpudJgBp31e+QWGY82DjPrnb0P0yKLWvs=" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js" integrity="sha256-KM512VNnjElC30ehFwehXjx1YCHPiQkOPmqnrWtpccM=" crossorigin="anonymous"></script>
+</head>
+<body>
+
+<div id="choose" style="background: #e0ffff;">
+    <h1 class="heading" style="margin: 15px;">Interactive Segmentation Data Sets</h1>
+    <table width="100%">
+        <tr>
+            <td style="background: #e0ffff; padding-bottom: 1.5em;">
+                <span class="col-md-6" style="padding-right: 0;">Please segment as many of the provided images as you like. <span id="thanks">Thank you!</span></span>
+                <span title="Your current progress" class="col-md-4" style="background: #e8f2ed; padding:0; margin: 0;">
+                    <span id="progressbar" class="progress-bar progress-bar-info progress-bar-striped" role="progressbar"
+                          aria-valuenow="1" aria-valuemin="0" aria-valuemax="100" style="width:1%; border: 1px;">
+                        1%
+                    </span>
+                </span>
+            </td>
+        </tr>
+        <tr>
+            <td style="background: #e0ffff; padding-left: 1em;">
+                <ol id="test_items" class="two_columns" class="row col-md-12"></ol>
+            </td>
+        </tr>
+    </table>
+    <table width="100%">
+        <tr>
+            <td style=" background: #e8f2ed; padding-left: 15px;">
+                <button id="reset_btn" style="padding: 0.25em 0.4em 0.25em 0.4em; margin-top: 1em; margin-bottom: 1em; font-size: 100%;">Finish</button>
+            </td>
+        </tr>
+    </table>
+</div>
+
+<script src="script/img_data.js"></script>
+
+<script>
+    let name = false,
+        choose = false,
+        parent = false,
+        div = false;
+
+    function setCookie(key, value) {
+        document.cookie = key + '=' + value + '; path=/';
+    }
+
+    function getCookie(key) {
+        const name_eq = key + '=',
+            cookie_parts = document.cookie.split(';'),
+            len = cookie_parts.length;
+        for(let i=0; i < len; ++i) {
+            let current_info = cookie_parts[i].trim();
+            if (0 === current_info.indexOf(name_eq))
+                return current_info.substring(name_eq.length, current_info.length);
+        }
+        return null;
+    }
+
+    function generateDataSetListItems(data_sets, test_items_dom, user_name){ // document.getElementById('test_items')
+        const segmented_data_set_ids = getCookie('segmented_data_set_ids')||[],
+            num_segmented_data_set_ids = (segmented_data_set_ids.length) ? segmented_data_set_ids.split(',').length : 0|0,
+            gen_elem = function(user_name_, link_name_, data_set_path){
+                const el = document.createElement('li'),
+                    a = document.createElement('a');
+                if (!data_set_path)
+                    data_set_path = link_name_;
+                el.className = 'itemsep_list';
+                a.href = 'segment.html#' + user_name_ + '@' + data_set_path;
+                a.textContent = link_name_.replace(/_/g, ' ');
+                el.appendChild(a);
+                return el;
+            };
+        data_sets.map(function(link_name) {
+            if (!segmented_data_set_ids.includes(user_name + '@' + link_name)){
+                test_items_dom.appendChild(gen_elem(user_name, link_name));
+            }
+        });
+        document.getElementsByTagName('html')[0].id = 'html';
+
+        const prog_bar = document.getElementById('progressbar'),
+            thanks = document.getElementById('thanks');
+        prog_bar.innerHTML = '' + num_segmented_data_set_ids /* * 100 / 100 */ + '%';
+        prog_bar.setAttribute('aria-valuenow', num_segmented_data_set_ids);
+        prog_bar.style.width = '' + num_segmented_data_set_ids /* * 100 / 100 */ + '%';
+
+        thanks.style.fontSize = '' + (100 * Math.pow(1 + num_segmented_data_set_ids / 100, 2)) + '%';
+        if (24 < num_segmented_data_set_ids){
+            thanks.style.fontWeight = 'bold';
+        }
+    }
+
+    document.getElementById('reset_btn').addEventListener('click', goto_index, false);
+    function goto_index(){
+        window.location.href = window.location.href.split('#')[0];
+    }
+
+    function editURLs(){
+        const text = document.getElementById('text');
+        if (text){
+            name = text.value.trim();
+            if (name && 3 < name.length) {
+                window.location.href += '#' + name;
+                parent.removeChild(div);
+                parent.appendChild(choose);
+            }
+        }
+        if (name && 3 < name.length) {
+            const test_items_dom = document.getElementById('test_items'),
+                data_sets = get_overall_image_data_global(null);
+
+            generateDataSetListItems(data_sets, test_items_dom, name);
+            randomizeNodeOrder(test_items_dom, name);
+
+            const reset_btn = document.getElementById('reset_btn');
+            reset_btn.innerHTML = 'Logout ' + name + ' & save current progress via 🍪';
+            reset_btn.title = 'Logout ' + name + ' & save current progress via cookie';
+
+            // update cookie
+            const user_names = getCookie('user_names');
+            if (null === user_names){
+                setCookie('user_names', name);
+            } else {
+                const un_d = {};
+                un_d[name] = true;
+                for (let u of user_names.split('###')){
+                    un_d[u] = true;
+                }
+                setCookie('user_names', Object.keys(un_d).join('###'));
+            }
+            //
+        } else {
+            text.value = text.value.trim();
+            alert('Please use a name with 4 or more characters.')
+        }
+    }
+
+    function randomizeOrder(items, seed_str){
+        let temp, idx = items.length;
+        // Sets Math.random to a PRNG initialized using the given explicit seed.
+        Math.seedrandom(seed_str);
+        while(--idx){
+            const new_index = (idx * Math.random())|0;
+            temp = items[new_index];
+            items[new_index] = items[idx];
+            items[idx] = temp;
+        }
+        return items;
+    }
+
+    function randomizeNodeOrder(dom_elem, seed_str){
+        const list = dom_elem;
+        let nodes = list.children,
+            idx = nodes.length;
+        nodes = Array.prototype.slice.call(nodes);
+        nodes = randomizeOrder(nodes, seed_str);
+        while(--idx){
+            list.appendChild(nodes[idx]);
+        }
+    }
+
+    if (1 < window.location.href.split('@').length){
+        window.location.href = window.location.href.split('@')[0];
+    }
+
+    const url = window.location.href.split('#');
+    name = (1 > url.length) ? false :  url[1];
+    name = (!name || 1 > name.length) ? false : name.split('@')[0].replace(/,/g, '_');
+    if (!!name){
+        editURLs();
+    } else {
+        choose = document.getElementById('choose');
+        parent = choose.parentNode;
+        parent.removeChild(choose);
+
+        div = document.createElement('div');
+        div.className = 'center';
+        const form = document.createElement('input');
+        form.type = 'text';
+        form.id = 'text';
+        form.placeholder = 'Your name or pseudonym here..';
+        form.style.width = '360px';
+        form.style.fontSize = '150%';
+        const confirm = document.createElement('button');
+        confirm.innerHTML = 'Start tests';
+        confirm.style.fontSize = '150%';
+        confirm.addEventListener('click', editURLs, false);
+
+        div.appendChild(form);
+        div.appendChild(confirm);
+        parent.appendChild(div);
+
+        const user_names_str = getCookie('user_names');
+        if (null !== user_names_str)
+            $(form).autocomplete({source: user_names_str.split('###')});
+    }
+</script>
+</body>
+</html>

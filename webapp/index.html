@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Interactive Segmentation</title>
+    <style>
+        #html {
+            background: #f0f0f0;
+        }
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: Helvetica;
+        }
+        .heading {
+            font-size: 200%;
+            margin: 2% 0 0 0;
+            text-align: center;
+        }
+        .infotext {
+            font-size: 140%;
+            margin: 1em 0 0 0;
+            text-align: center;
+        }
+        .center {
+            font-size: 400%;
+            margin: 15% 30% 0 30%;
+            padding: 0;
+        }
+        .loader {
+            border: 16px solid #f3f3f3; /* Light grey */
+            border-top: 16px solid #3498db; /* Blue */
+            border-radius: 50%;
+            width: 300px;
+            height: 300px;
+            animation: spin 2s linear infinite;
+            margin: 5% 0 0 40%;
+            cursor: progress;
+        }
+        @keyframes spin {
+            0% {transform: rotate(0deg);}
+            100% {transform: rotate(360deg);}
+        }
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.css" integrity="sha256-rByPlHULObEjJ6XQxW/flG2r+22R5dKiAoef+aXWfik=" crossorigin="anonymous" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/seedrandom/2.4.4/seedrandom.min.js" integrity="sha256-DVEUoO0nRxUpudJgBp31e+QWGY82DjPrnb0P0yKLWvs=" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js" integrity="sha256-KM512VNnjElC30ehFwehXjx1YCHPiQkOPmqnrWtpccM=" crossorigin="anonymous"></script>
+</head>
+<body>
+
+<div id="choose">
+    <h1 class="heading">Interactive Segmentation Data Sets</h1>
+    <p class="infotext">Please segment as many of the provided images as you like. <span id="thanks">Thank you!</span></p>
+    <div class="loader"></div>
+</div>
+
+<script src="script/img_data.js"></script>
+<script src="script/index.js"></script>
+</body>
+</html>

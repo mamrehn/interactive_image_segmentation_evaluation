@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Save displayed content as "img_data.js" -- Image to Base64DataURL encoding</title>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script>
+</head>
+<body>
+<pre id="result"></pre>
+<script>
+
+    const overall_results = {};
+
+    function write_to_dom(overall_results_, dom_id){
+        document.getElementById(dom_id).innerHTML =
+            'function get_overall_image_data_global(img_name){\n\tconst data = ' +
+                JSON.stringify(overall_results_, null, '\t') +
+                ';\n\tif (null === img_name){\n\t\treturn Object.keys(data);\n\t}\n\treturn data[img_name];\n}';
+        console.log(overall_results_);
+    }
+
+    function toDataUrl(url, name, mode, outputFormat){
+        const img = new Image();
+        img.crossOrigin = 'Anonymous';
+        img.onload = function(){
+            let canvas = document.createElement('canvas'),
+                ctx = canvas.getContext('2d');
+            canvas.height = this.height;
+            canvas.width = this.width;
+            ctx.drawImage(this, 0, 0);
+            console.log(name + ' ' + mode);
+            overall_results[name][mode] = canvas.toDataURL(outputFormat);
+            canvas = null;
+        };
+        img.src = url;
+    }
+
+    // Note: you may generate your own image and ground truth pairs, e.g. by browsing https://www.pexels.com/search/object/
+    const names = ['106024', '124084', '209070', '227092', '86016', 'ceramic', 'llama', 'sheep'];
+
+    names.forEach(function(name){
+        overall_results[name] = {}
+        console.log('data/' + name + '.png');
+        toDataUrl('data/' + name + '.png', name, 'img');
+        toDataUrl('data/' + name + '_gt.png', name, 'gt');
+    });
+
+    setTimeout(function(){
+            if (names.length === Object.keys(overall_results).length) {
+                write_to_dom(overall_results, 'result')
+            }
+        }, Math.sqrt(names.length) * 500);
+</script>
+</body>
+</html>
